@@ -1,74 +1,81 @@
 package com.simplecollection.collection;
 
+import java.util.Arrays;
+
 public class SimpleArrayList<T> {
 
     private static final int DEFAULT_CAPACITY = 10;
 
-    private static final Object[] EMPTY_ELEMENTDATA = {};
+    private static final Object[] EMPTY_ELEMENT_DATA = {};
 
     private Object[] elementData;
 
     private int size;
 
     public SimpleArrayList() {
-        elementData = EMPTY_ELEMENTDATA;
+        elementData = EMPTY_ELEMENT_DATA;
     }
 
-    private void ensureCapacityInternal(T element,int index){
-        if(elementData.length < size){
-            Object[] newArray = new Object[elementData.length + DEFAULT_CAPACITY];
-            for (int i = 0; i < elementData.length; i++) {
-                newArray[i] = elementData[i];
-            }
-            elementData = newArray;
-        }
-        if(index == size){
-            elementData[size] = element;
-        }else {
-            for (int i = size; i > index; i--) {
-                elementData[i + 1] = elementData[i];
-            }
-            elementData[index] = element;
-        }
+    public void add(T element) {
+        grow(calculateCapacity(elementData, size + 1));
+        elementData[size++] = element;
     }
 
-    public void add(T element){
-        size ++;
-        ensureCapacityInternal(element,size);
+    public void add(int index, T element) {
+        rangeCheckForAdd(index);
+        grow(calculateCapacity(elementData, size + 1));
+        System.arraycopy(elementData, index, elementData, index + 1, size - index);
+        elementData[index] = element;
+        size++;
     }
 
-    public void add(int index,T element){
-        size ++;
-        ensureCapacityInternal(element,index);
+    public void remove(int index) {
+        rangeCheckForAdd(index);
+        System.arraycopy(elementData, index + 1, elementData, index, size - index - 1);
+        elementData[--size] = null;
     }
 
-    public void remove(T element){
-        size --;
+    public void remove(T element) {
         for (int i = 0; i < elementData.length; i++) {
-            if(elementData[i].equals(element)){
-                elementData[i] = elementData[i + 1];
+            if(element.equals(elementData[i])){
+                remove(i);
             }
         }
     }
 
-    public void remove(int index){
-        size -- ;
-        for (int i = index; i < elementData.length; i++) {
-            elementData[i] = elementData[i + 1];
-        }
-    }
-
-    public void set(int index,T element){
+    public void set(int index, T element) {
         elementData[index] = element;
     }
 
 
-    public Object get(int index){
+    public Object get(int index) {
         return elementData[index];
     }
 
-    public int size(){
+    public int size() {
         return size;
+    }
+
+    private void rangeCheckForAdd(int index) {
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    private static int calculateCapacity(Object[] elementData, int minCapacity) {
+        if (elementData == EMPTY_ELEMENT_DATA) {
+            return Math.max(DEFAULT_CAPACITY, minCapacity);
+        }
+        return minCapacity;
+    }
+
+    private void grow(int minCapacity) {
+        int oldCapacity = elementData.length;
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0) {
+            newCapacity = minCapacity;
+        }
+        elementData = Arrays.copyOf(elementData, newCapacity);
     }
 
 }
